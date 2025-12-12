@@ -17,6 +17,13 @@ export class UserResponseDto {
   emailAddress: string;
 
   @ApiProperty({
+    example: '+1234567890',
+    description: 'User phone number',
+    nullable: true,
+  })
+  phoneNumber: string | null;
+
+  @ApiProperty({
     example: 'https://img.clerk.com/...',
     description: 'User profile picture URL',
     nullable: true,

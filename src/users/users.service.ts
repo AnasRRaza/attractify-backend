@@ -69,7 +69,14 @@ export class UsersService {
       // Query user from database including clerkId
       const user = await this.usersRepository.findOne({
         where: { slug },
-        select: ['slug', 'firstName', 'lastName', 'emailAddress', 'clerkId'],
+        select: [
+          'slug',
+          'firstName',
+          'lastName',
+          'emailAddress',
+          'clerkId',
+          'phoneNumber',
+        ],
       });
 
       if (!user) {
@@ -82,6 +89,7 @@ export class UsersService {
         firstName: user.firstName,
         lastName: user.lastName,
         emailAddress: user.emailAddress,
+        phoneNumber: user.phoneNumber,
         profilePicture: null,
       };
 
