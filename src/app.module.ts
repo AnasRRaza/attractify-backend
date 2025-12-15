@@ -21,7 +21,9 @@ import { ClerkModule } from './clerk/clerk.module';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        migrations: [__dirname + '/../migrations/**/*{.ts,.js}'],
         synchronize: false, // Rails manages the schema, so we disable auto-sync
+        migrationsRun: false, // Run migrations manually
         logging: configService.get('NODE_ENV') === 'development', // Only log in development
         ssl:
           configService.get('DB_SSL') === 'true'

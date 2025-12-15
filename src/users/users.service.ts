@@ -2,8 +2,11 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
+import { PortfolioFormSubmission } from './entities/portfolio-form-submission.entity';
 import { ClerkService } from '../clerk/clerk.service';
 import { UserResponseDto } from './dto/user-response.dto';
+import { CreatePortfolioFormSubmissionDto } from './dto/create-portfolio-form-submission.dto';
+import { PortfolioFormSubmissionResponseDto } from './dto/portfolio-form-submission-response.dto';
 
 @Injectable()
 export class UsersService {
@@ -12,6 +15,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(PortfolioFormSubmission)
+    private portfolioFormSubmissionRepository: Repository<PortfolioFormSubmission>,
     private clerkService: ClerkService,
   ) {}
 
@@ -123,6 +128,57 @@ export class UsersService {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`Error fetching user by slug with profile: ${message}`);
+      throw error;
+    }
+  }
+
+  async createPortfolioFormSubmission(
+    dto: CreatePortfolioFormSubmissionDto,
+  ): Promise<PortfolioFormSubmissionResponseDto> {
+    try {
+      this.logger.log(
+        `Creating portfolio form submission for user slug: ${dto.userSlug}`,
+      );
+
+      // Find user by slug to get user ID
+      const user = await this.usersRepository.findOne({
+        where: { slug: dto.userSlug },
+        select: ['id'],
+      });
+
+      if (!user) {
+        throw new NotFoundException(
+          `User with slug '${dto.userSlug}' not found`,
+        );
+      }
+
+      // Create portfolio form submission entity
+      const submission = this.portfolioFormSubmissionRepository.create({
+        userId: user.id,
+        answer1: dto.answer1,
+        answer2: dto.answer2,
+        presentation: dto.presentation,
+        interestLevel: dto.interestLevel,
+        email: dto.email,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      // Save submission
+      const savedSubmission =
+        await this.portfolioFormSubmissionRepository.save(submission);
+
+      this.logger.log(
+        `Portfolio form submission created successfully with ID: ${savedSubmission.id}`,
+      );
+
+      return {
+        id: savedSubmission.id,
+        message: 'Portfolio form submission created successfully',
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error creating portfolio form submission: ${message}`);
       throw error;
     }
   }
